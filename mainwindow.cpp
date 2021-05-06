@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cpFfiles,SIGNAL(copyEnd(QString)),this,SLOT(copyEnd(QString)));
     connect(cpFfiles,SIGNAL(copyStop(QString)),this,SLOT(copyStop(QString)));
 
+    connect(&updateTimer,SIGNAL(timeout()),this,SLOT(updateTimerTimeout()));
+
     video_filters = cpFfiles->getVideoFilters();
     picture_filters = cpFfiles->getPictureFilters();
     all_filters = video_filters;
@@ -94,8 +96,18 @@ void MainWindow::setCurrentPbValue(uint64_t value)
 {
     ui->progressBar_2->setValue(value);
 }
+void MainWindow::updateTimerTimeout()
+{
+    ui->progressBar->setRange(0,file_list->length());
+    ui->progressBar->setValue(cpFfiles->getIndex());
+
+    ui->progressBar_2->setRange(0,cpFfiles->getFileSize());
+    ui->progressBar_2->setValue(cpFfiles->getCSize());
+}
 void MainWindow::copyEnd(QString result)
 {
+    updateTimer.stop();
+    ui->progressBar_2->setValue(cpFfiles->getFileSize());
     ui->label_2->setText(result);
     is_in_process = false;
     file_list->clear();
@@ -106,6 +118,8 @@ void MainWindow::copyEnd(QString result)
 }
 void MainWindow::copyStop(QString result)
 {
+    updateTimer.stop();
+    ui->progressBar_2->setValue(cpFfiles->getFileSize());
     is_in_process = false;
     ui->label_2->setText(result);
     file_list->clear();
@@ -162,4 +176,5 @@ void MainWindow::on_startBtn_clicked()
     emit startCopyFiles(dstDir,file_list,type,ui->isRemove->isChecked(),ui->ignoreSame->isChecked());
     ui->startBtn->setText("停止");
     is_in_process = true;
+    updateTimer.start(50);
 }

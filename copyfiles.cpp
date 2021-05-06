@@ -23,27 +23,39 @@ void copyFiles::stopCopyFiles()
 {
     is_exit = true;
 }
-
+uint64_t copyFiles::getCSize()
+{
+    return c_size;
+}
+uint64_t copyFiles::getIndex()
+{
+    return index;
+}
+uint64_t copyFiles::getFileSize()
+{
+    return file_size;
+}
 void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classify_type,bool is_remove,bool ignore_same)
 {
     QString pic_dir = dst + "/图片";
     QString video_dir = dst + "/视频";
 
     QString dst_path,mk_dir,type;
-    uint64_t total_files = file_list->length();
+    //uint64_t total_files = file_list->length();
     uint64_t pic_files = 0;
     uint64_t video_files = 0;
     uint64_t pic_files_success = 0;
     uint64_t video_files_success = 0;
-    uint64_t index = 0;
+    //uint64_t index = 0;
+    index = 0;
     is_exit = false;
-    emit setTotalPbRange(total_files);
+    //emit setTotalPbRange(total_files);
     foreach(QString src_file_path,*file_list)
     {
         if(is_exit)
             break;
         index++;
-        emit setTotalPbValue(index);
+        //emit setTotalPbValue(index);
         QFileInfo src_file_info(src_file_path);
         type = "*." + src_file_info.suffix();
         QDateTime lt;
@@ -56,8 +68,9 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
             lt = src_file_info.lastModified().toLocalTime();
         }
         mk_dir = lt.toString("yyyy/MM");
-        emit setCurrentPbRange(src_file_info.size());
-        emit setCurrentPbValue(0);
+        file_size = src_file_info.size();
+        //emit setCurrentPbRange(src_file_info.size());
+        //emit setCurrentPbValue(0);
 
         QString type_dir;
         if(picture_filters.contains(type))
@@ -97,7 +110,7 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
             f.remove();
         }
         QFile ifile,ofile;
-        uint64_t c_size = 0;
+        //uint64_t c_size = 0;
         ifile.setFileName(src_file_path);
         if(!ifile.open(QIODevice::ReadOnly))
         {
@@ -117,12 +130,13 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
         int readSize = 0;
         infile.resetStatus();
         outfile.resetStatus();
+        c_size = 0;
         while(!infile.atEnd())
         {
             readSize = infile.readRawData(byteTemp, 4096);
             outfile.writeRawData(byteTemp, readSize);
             c_size += readSize;
-            emit setCurrentPbValue(c_size);
+            //emit setCurrentPbValue(c_size);
         }
         ifile.close();
         ofile.close();

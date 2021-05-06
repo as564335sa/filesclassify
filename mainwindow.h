@@ -11,6 +11,7 @@
 #include <QDirIterator>
 #include <QDateTime>
 #include <QThread>
+#include <QTimer>
 #include "copyfiles.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,6 +30,8 @@ public:
     QThread copyThread;
     copyFiles *cpFfiles;
 
+    QTimer updateTimer;
+
     bool is_in_process;
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -39,6 +42,7 @@ private slots:
     void on_dstPushButton_clicked();
     void on_startBtn_clicked();
     void on_isRemove_clicked();
+    void updateTimerTimeout();
     void setTotalPbRange(uint64_t size);
     void setTotalPbValue(uint64_t value);
     void setCurrentPbRange(uint64_t size);
