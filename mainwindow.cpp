@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType<uint8_t>("uint8_t");
     cpFfiles = new copyFiles;
     cpFfiles->moveToThread(&copyThread);
-    connect(this,SIGNAL(startCopyFiles(QString,QStringList*,uint8_t,bool,bool)),cpFfiles,SLOT(startCopyFiles(QString,QStringList*,uint8_t,bool,bool)));
+    connect(this,SIGNAL(startCopyFiles(QString,QStringList*,uint8_t,bool,bool,bool)),cpFfiles,SLOT(startCopyFiles(QString,QStringList*,uint8_t,bool,bool,bool)));
     connect(cpFfiles,SIGNAL(setTotalPbRange(uint64_t)),this,SLOT(setTotalPbRange(uint64_t)));
     connect(cpFfiles,SIGNAL(setTotalPbValue(uint64_t)),this,SLOT(setTotalPbValue(uint64_t)));
     connect(cpFfiles,SIGNAL(setCurrentPbRange(uint64_t)),this,SLOT(setCurrentPbRange(uint64_t)));
@@ -101,13 +101,13 @@ void MainWindow::updateTimerTimeout()
     ui->progressBar->setRange(0,file_list->length());
     ui->progressBar->setValue(cpFfiles->getIndex());
 
-    ui->progressBar_2->setRange(0,cpFfiles->getFileSize());
-    ui->progressBar_2->setValue(cpFfiles->getCSize());
+    //ui->progressBar_2->setRange(0,cpFfiles->getFileSize());
+    ui->progressBar_2->setValue(cpFfiles->getCSize() * 100 / cpFfiles->getFileSize());
 }
 void MainWindow::copyEnd(QString result)
 {
     updateTimer.stop();
-    ui->progressBar_2->setValue(cpFfiles->getFileSize());
+    ui->progressBar_2->setValue(100);
     ui->label_2->setText(result);
     is_in_process = false;
     file_list->clear();
@@ -119,7 +119,7 @@ void MainWindow::copyEnd(QString result)
 void MainWindow::copyStop(QString result)
 {
     updateTimer.stop();
-    ui->progressBar_2->setValue(cpFfiles->getFileSize());
+    ui->progressBar_2->setValue(100);
     is_in_process = false;
     ui->label_2->setText(result);
     file_list->clear();
@@ -173,7 +173,7 @@ void MainWindow::on_startBtn_clicked()
         type = 0;
     else if(ui->radioButton_2->isChecked())
         type = 1;
-    emit startCopyFiles(dstDir,file_list,type,ui->isRemove->isChecked(),ui->ignoreSame->isChecked());
+    emit startCopyFiles(dstDir,file_list,type,ui->checkBox->isChecked(),ui->isRemove->isChecked(),ui->ignoreSame->isChecked());
     ui->startBtn->setText("停止");
     is_in_process = true;
     updateTimer.start(50);

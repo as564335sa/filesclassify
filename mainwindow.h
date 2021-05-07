@@ -12,6 +12,8 @@
 #include <QDateTime>
 #include <QThread>
 #include <QTimer>
+#include <QImage>
+
 #include "copyfiles.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,7 +52,7 @@ private slots:
     void copyEnd(QString result);
     void copyStop(QString result);
 signals:
-    void startCopyFiles(QString dst,QStringList *file_list,uint8_t classify_type,bool is_remove,bool ignore_same);
+    void startCopyFiles(QString dst,QStringList *file_list,uint8_t classify_type,bool is_use_original_time,bool is_remove,bool ignore_same);
 private:
     Ui::MainWindow *ui;
 };

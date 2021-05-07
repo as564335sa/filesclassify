@@ -7,13 +7,18 @@
 #include <QDir>
 #include <QDataStream>
 #include <QDebug>
+#include <QImage>
+#include <QImageIOHandler>
+#include <QImageReader>
+//#include <QExifImageHeader>
+
 class copyFiles : public QObject
 {
     Q_OBJECT
 public:
     explicit copyFiles(QObject *parent = nullptr);
 
-    uint64_t index;
+    int index;
     uint64_t c_size;
     uint64_t file_size;
 
@@ -21,16 +26,17 @@ public:
     QStringList picture_filters;
     QStringList all_filters;
 
+    QByteArray pic_data;
     bool is_exit = false;
     QStringList getVideoFilters();
     QStringList getPictureFilters();
     void stopCopyFiles();
     uint64_t getCSize();
-    uint64_t getIndex();
+    int getIndex();
     uint64_t getFileSize();
 
 private slots:
-    void startCopyFiles(QString dst,QStringList *file_list,uint8_t classify_type,bool is_remove,bool ignore_same);
+    void startCopyFiles(QString dst,QStringList *file_list,uint8_t classify_type,bool is_use_original_time,bool is_remove,bool ignore_same);
 signals:
     void setTotalPbRange(uint64_t size);
     void setTotalPbValue(uint64_t value);

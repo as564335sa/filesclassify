@@ -1,9 +1,10 @@
 #include "copyfiles.h"
+#include "exif.h"
 
 copyFiles::copyFiles(QObject *parent) : QObject(parent)
 {
     is_exit = false;
-    video_filters << "*.avi"<<"*.flv"<<"*.mpg"<<"*.mpeg"<<"*.mpe"<<"*.m1v"<<"*.m2v"<<"*.mpv2"<<"*.mp2v"<<"*.dat"<<"*.ts"<<"*.mp4"<<"*.m4v"<<
+    video_filters << "*.avi"<<"*.flv"<<"*.mpg"<<"*.mpeg"<<"*.mpe"<<"*.m1v"<<"*.m2v"<<"*.mpv2"<<"*.mp2v"<<"*.ts"<<"*.mp4"<<"*.m4v"<<
             "*.m4p"<<"*.m4b"<<"*.3gp"<<"*.3gpp"<<"*.3g2"<<"*.3gp2"<<"*.ogg"<<"*.mov"<<"*.rm"<<"*.rmvb"<<"*.mkv";
     picture_filters << "*.jpg" << "*.jpeg" << "*.png" << "*.bmp" << "*.gif" << "*.wmf" << "*.ico" << "*.psd";
     all_filters << video_filters;
@@ -21,13 +22,13 @@ QStringList copyFiles::getPictureFilters()
 
 void copyFiles::stopCopyFiles()
 {
-    is_exit = true;
+    is_exit = true;QImageReader a;
 }
 uint64_t copyFiles::getCSize()
 {
     return c_size;
 }
-uint64_t copyFiles::getIndex()
+int copyFiles::getIndex()
 {
     return index;
 }
@@ -35,7 +36,7 @@ uint64_t copyFiles::getFileSize()
 {
     return file_size;
 }
-void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classify_type,bool is_remove,bool ignore_same)
+void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classify_type,bool is_use_original_time,bool is_remove,bool ignore_same)
 {
     QString pic_dir = dst + "/图片";
     QString video_dir = dst + "/视频";
@@ -50,6 +51,8 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
     index = 0;
     is_exit = false;
     //emit setTotalPbRange(total_files);
+    QStringList jpglist;
+    jpglist << "*.jpg" << "*.jpeg";
     foreach(QString src_file_path,*file_list)
     {
         if(is_exit)
@@ -67,7 +70,25 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
         {
             lt = src_file_info.lastModified().toLocalTime();
         }
+        if(is_use_original_time && jpglist.contains(type))
+        {
+            pic_data.resize(src_file_info.size());
+            QFile pic(src_file_path);
+            pic.open(QIODevice::ReadOnly);
+            pic_data = pic.readAll();
+            char *buf = pic_data.data();
+            easyexif::EXIFInfo result;
+            int code = result.parseFrom((unsigned char*)buf,src_file_info.size());
+            if (!code){
+                QString str = QString::fromStdString(result.DateTimeOriginal);
+                if(!str.isEmpty())
+                    lt = QDateTime::fromString(str,"yyyy:MM:dd hh:mm:ss");
+                //qDebug() << str << "lt" << lt;
+            }
+            pic.close();
+        }
         mk_dir = lt.toString("yyyy/MM");
+        //qDebug() << mk_dir;
         file_size = src_file_info.size();
         //emit setCurrentPbRange(src_file_info.size());
         //emit setCurrentPbValue(0);
@@ -110,7 +131,6 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
             f.remove();
         }
         QFile ifile,ofile;
-        //uint64_t c_size = 0;
         ifile.setFileName(src_file_path);
         if(!ifile.open(QIODevice::ReadOnly))
         {
@@ -128,8 +148,8 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
         outfile.setVersion(QDataStream::Qt_5_15);
         char byteTemp[4096];
         int readSize = 0;
-        infile.resetStatus();
-        outfile.resetStatus();
+        //infile.resetStatus();
+        //outfile.resetStatus();
         c_size = 0;
         while(!infile.atEnd())
         {
@@ -138,6 +158,10 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
             c_size += readSize;
             //emit setCurrentPbValue(c_size);
         }
+        QDateTime t = ifile.fileTime(QFileDevice::FileModificationTime);
+        ofile.setFileTime(t,QFileDevice::FileModificationTime);
+//        QDateTime t = ifile.fileTime(QFileDevice::FileModificationTime);
+//        ofile.setFileTime(t,QFileDevice::FileModificationTime);
         ifile.close();
         ofile.close();
         if(is_remove)
@@ -168,4 +192,5 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
         emit copyStop(result_str);
     else
         emit copyEnd(result_str);
+    pic_data.resize(0);
 }

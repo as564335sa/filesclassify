@@ -161,6 +161,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox">
+        <property name="text">
+         <string>图片使用拍摄时间(jpg)</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -194,7 +204,7 @@
       <item>
        <widget class="QProgressBar" name="progressBar_2">
         <property name="maximum">
-         <number>1</number>
+         <number>100</number>
         </property>
         <property name="value">
          <number>0</number>

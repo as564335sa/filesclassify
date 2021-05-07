@@ -10,11 +10,13 @@ CONFIG += c++11
 
 SOURCES += \
     copyfiles.cpp \
+    exif.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     copyfiles.h \
+    exif.h \
     mainwindow.h
 
 FORMS += \
