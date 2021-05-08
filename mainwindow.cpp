@@ -78,6 +78,7 @@ void MainWindow::getfiles(QStringList *list,const QString &dir_path)
         QFileInfo file_info = dir_iterator.fileInfo();
         QString files = file_info.absoluteFilePath();
         list->append(files);
+        QCoreApplication::processEvents();
     }
 }
 void MainWindow::setTotalPbRange(uint64_t size)
@@ -108,6 +109,7 @@ void MainWindow::copyEnd(QString result)
 {
     updateTimer.stop();
     ui->progressBar_2->setValue(100);
+    ui->progressBar->setValue(file_list->length());
     ui->label_2->setText(result);
     is_in_process = false;
     file_list->clear();
@@ -120,6 +122,7 @@ void MainWindow::copyStop(QString result)
 {
     updateTimer.stop();
     ui->progressBar_2->setValue(100);
+    ui->progressBar->setValue(file_list->length());
     is_in_process = false;
     ui->label_2->setText(result);
     file_list->clear();
@@ -160,6 +163,7 @@ void MainWindow::on_startBtn_clicked()
     d.mkpath(pic_dir);
     d.mkpath(video_dir);
 
+    ui->label_2->setText("扫描文件...");
     getfiles(file_list,srcDir);
     if(file_list->isEmpty())
     {

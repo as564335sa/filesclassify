@@ -1,6 +1,9 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <iomanip>
 #include "copyfiles.h"
-#include "exif.h"
-
+#include "TinyEXIF.h"
 copyFiles::copyFiles(QObject *parent) : QObject(parent)
 {
     is_exit = false;
@@ -72,20 +75,17 @@ void copyFiles::startCopyFiles(QString dst,QStringList *file_list,uint8_t classi
         }
         if(is_use_original_time && jpglist.contains(type))
         {
-            pic_data.resize(src_file_info.size());
-            QFile pic(src_file_path);
-            pic.open(QIODevice::ReadOnly);
-            pic_data = pic.readAll();
-            char *buf = pic_data.data();
-            easyexif::EXIFInfo result;
-            int code = result.parseFrom((unsigned char*)buf,src_file_info.size());
-            if (!code){
-                QString str = QString::fromStdString(result.DateTimeOriginal);
+            std::ifstream s(src_file_path.toLocal8Bit().data(),std::ios::binary);
+            TinyEXIF::EXIFInfo imageEXIF(s);
+            if (imageEXIF.Fields) {
+                QString str = QString::fromStdString(imageEXIF.DateTimeOriginal);
                 if(!str.isEmpty())
                     lt = QDateTime::fromString(str,"yyyy:MM:dd hh:mm:ss");
-                //qDebug() << str << "lt" << lt;
             }
-            pic.close();
+            else
+            {
+                qDebug() << src_file_path << "no exif";
+            }
         }
         mk_dir = lt.toString("yyyy/MM");
         //qDebug() << mk_dir;

@@ -9,14 +9,14 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    TinyEXIF.cpp \
     copyfiles.cpp \
-    exif.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    TinyEXIF.h \
     copyfiles.h \
-    exif.h \
     mainwindow.h
 
 FORMS += \
